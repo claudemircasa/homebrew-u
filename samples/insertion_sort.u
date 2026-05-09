@@ -1,0 +1,105 @@
+// Insertion Sort em U
+//
+// Array de 5 elementos representado como mapa { v0..v4 }.
+// O algoritmo é implementado funcionalmente: cada "troca" produz um
+// novo mapa em vez de mutação; `descer` é recursiva em vez de iterativa.
+//
+// Limitações contornadas:
+//   - Sem acesso a lista por índice: get/set funcionais sobre mapa { v0..v4 }
+//   - Sem múltiplos parâmetros: argumentos empacotados em mapa
+//   - match sem guards relacionais: condições separadas em booleanos
+//   - Sem estado mutável em loops: passos da ordenação unrolados em `ordenar`
+//   - String interpolation sem membro: variáveis locais extraídas antes do out
+
+// Retorna arr[i]  (i deve estar em 0..4)
+get: [par] {
+    match par.i {
+        0: par.arr.v0
+        1: par.arr.v1
+        2: par.arr.v2
+        3: par.arr.v3
+        _: par.arr.v4
+    }
+}
+
+// Retorna novo array com arr[i] = val
+set: [par] {
+    match par.i {
+        0: { v0: par.val, v1: par.arr.v1, v2: par.arr.v2, v3: par.arr.v3, v4: par.arr.v4 }
+        1: { v0: par.arr.v0, v1: par.val, v2: par.arr.v2, v3: par.arr.v3, v4: par.arr.v4 }
+        2: { v0: par.arr.v0, v1: par.arr.v1, v2: par.val, v3: par.arr.v3, v4: par.arr.v4 }
+        3: { v0: par.arr.v0, v1: par.arr.v1, v2: par.arr.v2, v3: par.val, v4: par.arr.v4 }
+        _: { v0: par.arr.v0, v1: par.arr.v1, v2: par.arr.v2, v3: par.arr.v3, v4: par.val }
+    }
+}
+
+// Move arr[j] para a esquerda enquanto arr[j] < arr[j-1].
+// Quando j = 0 ou arr[j] >= arr[j-1], para e devolve o array atual.
+// par = { arr, j }
+descer: [par] {
+    val_j:    get[{ i: par.j,     arr: par.arr }]
+    val_prev: get[{ i: par.j - 1, arr: par.arr }]
+    continua: par.j > 0
+    menor: val_j < val_prev
+    deve_trocar: match continua {
+        true: menor
+        _: false
+    }
+    tmp:     set[{ i: par.j,     val: val_prev, arr: par.arr }]
+    trocado: set[{ i: par.j - 1, val: val_j,   arr: tmp      }]
+    arr2: match deve_trocar {
+        true: trocado
+        _: par.arr
+    }
+    match deve_trocar {
+        true: descer[{ arr: arr2, j: par.j - 1 }]
+        _: arr2
+    }
+}
+
+// Insertion Sort completo: insere os elementos nas posições 1, 2, 3 e 4.
+// Sem suporte a loops com estado acumulado, os 4 passos são explícitos.
+ordenar: [arr] {
+    s1: descer[{ arr: arr, j: 1 }]
+    s2: descer[{ arr: s1,  j: 2 }]
+    s3: descer[{ arr: s2,  j: 3 }]
+    descer[{ arr: s3, j: 4 }]
+}
+
+"=== Insertion Sort ===" -> out
+"" -> out
+
+// --- Caso 1: aleatório ---
+arr: { v0: 5, v1: 3, v2: 1, v3: 4, v4: 2 }
+res: ordenar[arr]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out
+"" -> out
+
+// --- Caso 2: ordem inversa (pior caso) ---
+arr: { v0: 9, v1: 7, v2: 5, v3: 3, v4: 1 }
+res: ordenar[arr]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out
+"" -> out
+
+// --- Caso 3: já ordenado (melhor caso) ---
+arr: { v0: 1, v1: 2, v2: 3, v3: 4, v4: 5 }
+res: ordenar[arr]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out
+"" -> out
+
+// --- Caso 4: com duplicatas ---
+arr: { v0: 3, v1: 1, v2: 3, v3: 2, v4: 1 }
+res: ordenar[arr]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out

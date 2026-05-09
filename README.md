@@ -266,8 +266,3 @@ resultado: await projetarRendimento[taxa_selic]
 "Seu rendimento em 5 anos será:" -> out
 resultado -> out
 ```
-
----
-
-O Compilador Universal Abstract Language está vivo e aguardando suas diretrizes! 
-Para ver as especificações arquiteturais internas ou protocolos de linguagem (`aml.md`), verifique os diretórios de Tasks e o arquivo de especificações da governança original.

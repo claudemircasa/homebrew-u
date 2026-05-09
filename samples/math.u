@@ -1,0 +1,33 @@
+// Fatorial e Fibonacci em U
+// Demonstra recursão, match e pipelines
+
+// --- Fatorial ---
+
+fatorial: [n] {
+    match n {
+        0: 1
+        _: n * fatorial[n - 1]
+    }
+}
+
+"=== Fatorial ===" -> out
+each i in 0..7 {
+    resultado: fatorial[i]
+    "{i}! = {resultado}" -> out
+}
+
+// --- Fibonacci ---
+
+fibonacci: [n] {
+    match n {
+        0: 0
+        1: 1
+        _: fibonacci[n - 1] + fibonacci[n - 2]
+    }
+}
+
+"=== Fibonacci ===" -> out
+each i in 0..9 {
+    f: fibonacci[i]
+    "F({i}) = {f}" -> out
+}

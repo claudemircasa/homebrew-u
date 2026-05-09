@@ -1,0 +1,22 @@
+// Example Script in U (Universal Abstract Language)
+
+// 1. Basic Math and Assignment
+score: 10 + 5 * 2
+score -> out
+
+// 2. Iterative Logic and Variables
+each num in 1..3 {
+    num -> out
+}
+
+// 3. List Comprehensions (Functional)
+evens: each n in 1..4 when n % 2 == 0 yield n * 10
+evens -> out
+
+// 4. Closures
+double: [n] { n * 2 }
+double[50] -> out
+
+// 5. Agent Directives (AI-First)
+summarizeText: [text] [prompt: "Return a 2-sentence summary in Portuguese"]
+summarizeText["This is a very long article about the history of compilers."] -> out

@@ -1,0 +1,166 @@
+// Algoritmo de Dijkstra — Menor Caminho a partir da Fonte
+//
+// Grafo não-dirigido de 5 nós (0–4) com 6 arestas:
+//   0-1:4  0-2:1  1-2:2  1-3:1  2-3:5  3-4:3
+//
+// Estado: dist = { d0..d4 }, vis = { v0..v4 }
+// "INF" representado como 9999.
+//
+// Limitações contornadas:
+//   - Sem acesso a lista por índice: dist/vis como mapas {d0..d4}/{v0..v4}
+//   - Sem múltiplos parâmetros: argumentos empacotados em mapa
+//   - Sem `and`/`or`: condições compostas decompostas em booleanos + match aninhado
+//   - Bindings avaliados eagerly: cada passo recursivo de dijk guardado com match próprio
+//   - Sem estrutura de grafo dinâmica: vizinhança de cada nó codificada em relax0..relax4
+//   - match sem guard relacional: condições extraídas para variáveis booleanas
+
+// ─── Helpers de distância ────────────────────────────────────────────────────
+
+// Retorna dist[i]
+get_dist: [par] {
+    match par.i {
+        0: par.dist.d0
+        1: par.dist.d1
+        2: par.dist.d2
+        3: par.dist.d3
+        _: par.dist.d4
+    }
+}
+
+// ─── Find-min: nó não visitado com menor distância ──────────────────────────
+
+// Retorna o índice do nó não visitado com menor dist.
+// Nós já visitados recebem custo 9999 (INF) para serem ignorados.
+find_min: [par] {
+    c0: match par.vis.v0 { true: 9999 _: par.dist.d0 }
+    c1: match par.vis.v1 { true: 9999 _: par.dist.d1 }
+    c2: match par.vis.v2 { true: 9999 _: par.dist.d2 }
+    c3: match par.vis.v3 { true: 9999 _: par.dist.d3 }
+    c4: match par.vis.v4 { true: 9999 _: par.dist.d4 }
+
+    m01:   match c0 <= c1   { true: c0  _: c1  }
+    i01:   match c0 <= c1   { true: 0   _: 1   }
+    m012:  match m01 <= c2  { true: m01 _: c2  }
+    i012:  match m01 <= c2  { true: i01 _: 2   }
+    m0123: match m012 <= c3 { true: m012 _: c3 }
+    i0123: match m012 <= c3 { true: i012 _: 3  }
+
+    match m0123 <= c4 { true: i0123 _: 4 }
+}
+
+// ─── Set-vis: marca nó como visitado ─────────────────────────────────────────
+
+set_vis: [par] {
+    match par.i {
+        0: { v0: true,      v1: par.vis.v1, v2: par.vis.v2, v3: par.vis.v3, v4: par.vis.v4 }
+        1: { v0: par.vis.v0, v1: true,      v2: par.vis.v2, v3: par.vis.v3, v4: par.vis.v4 }
+        2: { v0: par.vis.v0, v1: par.vis.v1, v2: true,      v3: par.vis.v3, v4: par.vis.v4 }
+        3: { v0: par.vis.v0, v1: par.vis.v1, v2: par.vis.v2, v3: true,      v4: par.vis.v4 }
+        _: { v0: par.vis.v0, v1: par.vis.v1, v2: par.vis.v2, v3: par.vis.v3, v4: true      }
+    }
+}
+
+// ─── Relax por nó: aplica relaxamento das arestas do nó u ───────────────────
+// par = { dist_u, dist }
+// Retorna novo mapa dist com distâncias atualizadas.
+
+// Nó 0: arestas → 1 (w=4), → 2 (w=1)
+relax0: [par] {
+    nd1: match par.dist_u + 4 < par.dist.d1 { true: par.dist_u + 4 _: par.dist.d1 }
+    nd2: match par.dist_u + 1 < par.dist.d2 { true: par.dist_u + 1 _: par.dist.d2 }
+    { d0: par.dist.d0, d1: nd1, d2: nd2, d3: par.dist.d3, d4: par.dist.d4 }
+}
+
+// Nó 1: arestas → 0 (w=4), → 2 (w=2), → 3 (w=1)
+relax1: [par] {
+    nd0: match par.dist_u + 4 < par.dist.d0 { true: par.dist_u + 4 _: par.dist.d0 }
+    nd2: match par.dist_u + 2 < par.dist.d2 { true: par.dist_u + 2 _: par.dist.d2 }
+    nd3: match par.dist_u + 1 < par.dist.d3 { true: par.dist_u + 1 _: par.dist.d3 }
+    { d0: nd0, d1: par.dist.d1, d2: nd2, d3: nd3, d4: par.dist.d4 }
+}
+
+// Nó 2: arestas → 0 (w=1), → 1 (w=2), → 3 (w=5)
+relax2: [par] {
+    nd0: match par.dist_u + 1 < par.dist.d0 { true: par.dist_u + 1 _: par.dist.d0 }
+    nd1: match par.dist_u + 2 < par.dist.d1 { true: par.dist_u + 2 _: par.dist.d1 }
+    nd3: match par.dist_u + 5 < par.dist.d3 { true: par.dist_u + 5 _: par.dist.d3 }
+    { d0: nd0, d1: nd1, d2: par.dist.d2, d3: nd3, d4: par.dist.d4 }
+}
+
+// Nó 3: arestas → 1 (w=1), → 2 (w=5), → 4 (w=3)
+relax3: [par] {
+    nd1: match par.dist_u + 1 < par.dist.d1 { true: par.dist_u + 1 _: par.dist.d1 }
+    nd2: match par.dist_u + 5 < par.dist.d2 { true: par.dist_u + 5 _: par.dist.d2 }
+    nd4: match par.dist_u + 3 < par.dist.d4 { true: par.dist_u + 3 _: par.dist.d4 }
+    { d0: par.dist.d0, d1: nd1, d2: nd2, d3: par.dist.d3, d4: nd4 }
+}
+
+// Nó 4: arestas → 3 (w=3)
+relax4: [par] {
+    nd3: match par.dist_u + 3 < par.dist.d3 { true: par.dist_u + 3 _: par.dist.d3 }
+    { d0: par.dist.d0, d1: par.dist.d1, d2: par.dist.d2, d3: nd3, d4: par.dist.d4 }
+}
+
+// Despacha relaxamento para a função do nó correto
+// par = { u, dist_u, dist }
+relax: [par] {
+    match par.u {
+        0: relax0[{ dist_u: par.dist_u, dist: par.dist }]
+        1: relax1[{ dist_u: par.dist_u, dist: par.dist }]
+        2: relax2[{ dist_u: par.dist_u, dist: par.dist }]
+        3: relax3[{ dist_u: par.dist_u, dist: par.dist }]
+        _: relax4[{ dist_u: par.dist_u, dist: par.dist }]
+    }
+}
+
+// ─── Loop principal de Dijkstra ───────────────────────────────────────────────
+// par = { dist, vis, step }   step: contador decrescente (inicia em N)
+// Cada binding recursivo é protegido com match próprio — avaliação lazy.
+dijk: [par] {
+    terminado: par.step <= 0
+    u: match terminado {
+        true: 0
+        _: find_min[{ dist: par.dist, vis: par.vis }]
+    }
+    dist_u: match terminado {
+        true: 0
+        _: get_dist[{ i: u, dist: par.dist }]
+    }
+    new_dist: match terminado {
+        true: par.dist
+        _: relax[{ u: u, dist_u: dist_u, dist: par.dist }]
+    }
+    new_vis: match terminado {
+        true: par.vis
+        _: set_vis[{ i: u, vis: par.vis }]
+    }
+    match terminado {
+        true: par.dist
+        _: dijk[{ dist: new_dist, vis: new_vis, step: par.step - 1 }]
+    }
+}
+
+// ─── Execução ─────────────────────────────────────────────────────────────────
+
+"=== Dijkstra — Menor Caminho ===" -> out
+"Grafo: 5 nós  |  0-1:4  0-2:1  1-2:2  1-3:1  2-3:5  3-4:3" -> out
+"Fonte: nó 0" -> out
+"" -> out
+
+dist_ini: { d0: 0, d1: 9999, d2: 9999, d3: 9999, d4: 9999 }
+vis_ini:  { v0: false, v1: false, v2: false, v3: false, v4: false }
+
+resultado: dijk[{ dist: dist_ini, vis: vis_ini, step: 5 }]
+
+r0: resultado.d0
+r1: resultado.d1
+r2: resultado.d2
+r3: resultado.d3
+r4: resultado.d4
+
+"Distâncias mínimas a partir do nó 0:" -> out
+"  nó 0 → {r0}" -> out
+"  nó 1 → {r1}  (caminho: 0→2→1)" -> out
+"  nó 2 → {r2}  (caminho: 0→2)" -> out
+"  nó 3 → {r3}  (caminho: 0→2→1→3)" -> out
+"  nó 4 → {r4}  (caminho: 0→2→1→3→4)" -> out

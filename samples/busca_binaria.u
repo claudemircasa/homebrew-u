@@ -1,0 +1,101 @@
+// Busca Binária em U
+//
+// Array ordenado de 10 elementos: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+//
+// Limitações contornadas:
+//   - Sem acesso a lista por índice: array representado como mapa { v0..v9 }
+//   - Sem múltiplos parâmetros: argumentos agrupados em mapa { arr, low, high, target }
+//   - Divisão retorna f64: necessário floor[] para obter índice inteiro
+//   - match sem guards relacionais: condições extraídas para variáveis booleanas
+
+// Retorna o elemento do array na posição i (0–9)
+get: [par] {
+    match par.i {
+        0: par.arr.v0
+        1: par.arr.v1
+        2: par.arr.v2
+        3: par.arr.v3
+        4: par.arr.v4
+        5: par.arr.v5
+        6: par.arr.v6
+        7: par.arr.v7
+        8: par.arr.v8
+        _: par.arr.v9
+    }
+}
+
+// Busca binária recursiva
+// par = { arr, low, high, target }
+// Retorna o índice do target, ou -1 se não encontrado
+busca: [par] {
+    terminado: par.low > par.high
+    mid: floor[(par.low + par.high) / 2]
+    val: get[{ i: mid, arr: par.arr }]
+    encontrado: val == par.target
+    menor: val < par.target
+    match terminado {
+        true: -1
+        _: match encontrado {
+            true: mid
+            _: match menor {
+                true: busca[{ arr: par.arr, low: mid + 1, high: par.high, target: par.target }]
+                _:    busca[{ arr: par.arr, low: par.low, high: mid - 1, target: par.target }]
+            }
+        }
+    }
+}
+
+arr: { v0: 2, v1: 5, v2: 8, v3: 12, v4: 16, v5: 23, v6: 38, v7: 56, v8: 72, v9: 91 }
+hi: 9
+
+"=== Busca Binária ===" -> out
+"Array: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]" -> out
+"" -> out
+
+// Busca por 2 (primeiro elemento, índice 0)
+r: busca[{ arr: arr, low: 0, high: hi, target: 2 }]
+d: r != -1
+match d {
+    true: "busca( 2): encontrado no índice {r}" -> out
+    _:    "busca( 2): não encontrado" -> out
+}
+
+// Busca por 23 (elemento do meio, índice 5)
+r: busca[{ arr: arr, low: 0, high: hi, target: 23 }]
+d: r != -1
+match d {
+    true: "busca(23): encontrado no índice {r}" -> out
+    _:    "busca(23): não encontrado" -> out
+}
+
+// Busca por 91 (último elemento, índice 9)
+r: busca[{ arr: arr, low: 0, high: hi, target: 91 }]
+d: r != -1
+match d {
+    true: "busca(91): encontrado no índice {r}" -> out
+    _:    "busca(91): não encontrado" -> out
+}
+
+// Busca por 38 (índice 6)
+r: busca[{ arr: arr, low: 0, high: hi, target: 38 }]
+d: r != -1
+match d {
+    true: "busca(38): encontrado no índice {r}" -> out
+    _:    "busca(38): não encontrado" -> out
+}
+
+// Busca por 7 (não existe)
+r: busca[{ arr: arr, low: 0, high: hi, target: 7 }]
+d: r != -1
+match d {
+    true: "busca( 7): encontrado no índice {r}" -> out
+    _:    "busca( 7): não encontrado" -> out
+}
+
+// Busca por 100 (maior que todos, não existe)
+r: busca[{ arr: arr, low: 0, high: hi, target: 100 }]
+d: r != -1
+match d {
+    true: "busca(100): encontrado no índice {r}" -> out
+    _:    "busca(100): não encontrado" -> out
+}

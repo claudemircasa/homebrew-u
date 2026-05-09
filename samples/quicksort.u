@@ -1,0 +1,127 @@
+// Quicksort em U
+//
+// Array de 5 elementos representado como mapa { v0..v4 }.
+// Particionamento Lomuto: pivot = último elemento do intervalo.
+// Sem mutação: swap/get/set retornam novos mapas funcionalmente.
+//
+// Limitações contornadas:
+//   - Sem acesso a lista por índice: get/set funcionais sobre mapa { v0..v4 }
+//   - Sem múltiplos parâmetros: argumentos empacotados em mapa
+//   - Bindings avaliados eagerly: cada passo recursivo guardado com match próprio
+//     para evitar recursão infinita nos casos base (lo >= hi)
+//   - Operadores >= e <= não implementados → adicionados ao interpretador
+
+// Retorna arr[i]  (i deve estar em 0..4)
+get: [par] {
+    match par.i {
+        0: par.arr.v0
+        1: par.arr.v1
+        2: par.arr.v2
+        3: par.arr.v3
+        _: par.arr.v4
+    }
+}
+
+// Retorna novo array com arr[i] = val
+set: [par] {
+    match par.i {
+        0: { v0: par.val, v1: par.arr.v1, v2: par.arr.v2, v3: par.arr.v3, v4: par.arr.v4 }
+        1: { v0: par.arr.v0, v1: par.val, v2: par.arr.v2, v3: par.arr.v3, v4: par.arr.v4 }
+        2: { v0: par.arr.v0, v1: par.arr.v1, v2: par.val, v3: par.arr.v3, v4: par.arr.v4 }
+        3: { v0: par.arr.v0, v1: par.arr.v1, v2: par.arr.v2, v3: par.val, v4: par.arr.v4 }
+        _: { v0: par.arr.v0, v1: par.arr.v1, v2: par.arr.v2, v3: par.arr.v3, v4: par.val }
+    }
+}
+
+// Troca os elementos nas posições a e b; retorna novo array
+swap: [par] {
+    va: get[{ i: par.a, arr: par.arr }]
+    vb: get[{ i: par.b, arr: par.arr }]
+    tmp: set[{ i: par.a, val: vb, arr: par.arr }]
+    set[{ i: par.b, val: va, arr: tmp }]
+}
+
+// Particionamento Lomuto recursivo
+// Percorre arr[j] de lo até hi-1; elementos <= pivot vão para a esquerda.
+// Quando j atinge hi, encerra e coloca o pivot na posição correta.
+// par = { arr, lo, hi, i, j, pivot }
+// Retorna { arr, idx }  — arr reorganizado, idx = posição final do pivot
+part: [par] {
+    terminado: par.j >= par.hi
+    val_j: get[{ i: par.j, arr: par.arr }]
+    elegivel: val_j <= par.pivot
+    // arr_swapped serve tanto para a troca interna (elegivel=true)
+    // quanto para a troca final do pivot (terminado=true, onde j == hi)
+    arr_swapped: swap[{ arr: par.arr, a: par.i + 1, b: par.j }]
+    match terminado {
+        true: { arr: arr_swapped, idx: par.i + 1 }
+        _: match elegivel {
+            true: part[{ arr: arr_swapped, lo: par.lo, hi: par.hi, i: par.i + 1, j: par.j + 1, pivot: par.pivot }]
+            _:    part[{ arr: par.arr,    lo: par.lo, hi: par.hi, i: par.i,     j: par.j + 1, pivot: par.pivot }]
+        }
+    }
+}
+
+// Quicksort recursivo
+// par = { arr, lo, hi }
+//
+// Cuidado com avaliação eager: sem guardar cada binding com match próprio,
+// as chamadas recursivas seriam avaliadas mesmo quando lo >= hi, causando
+// recursão infinita (hi decresceria sem limite). Cada passo é lazy via match.
+qs: [par] {
+    terminado: par.lo >= par.hi
+    pivot: match terminado {
+        true: 0
+        _: get[{ i: par.hi, arr: par.arr }]
+    }
+    p: match terminado {
+        true: { arr: par.arr, idx: par.lo }
+        _: part[{ arr: par.arr, lo: par.lo, hi: par.hi, i: par.lo - 1, j: par.lo, pivot: pivot }]
+    }
+    arr2: match terminado {
+        true: par.arr
+        _: qs[{ arr: p.arr, lo: par.lo, hi: p.idx - 1 }]
+    }
+    match terminado {
+        true: par.arr
+        _: qs[{ arr: arr2, lo: p.idx + 1, hi: par.hi }]
+    }
+}
+
+"=== Quicksort ===" -> out
+"" -> out
+
+// --- Caso 1: aleatório ---
+arr: { v0: 5, v1: 3, v2: 1, v3: 4, v4: 2 }
+res: qs[{ arr: arr, lo: 0, hi: 4 }]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out
+"" -> out
+
+// --- Caso 2: ordem inversa (pior caso para Lomuto) ---
+arr: { v0: 9, v1: 7, v2: 5, v3: 3, v4: 1 }
+res: qs[{ arr: arr, lo: 0, hi: 4 }]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out
+"" -> out
+
+// --- Caso 3: já ordenado ---
+arr: { v0: 1, v1: 2, v2: 3, v3: 4, v4: 5 }
+res: qs[{ arr: arr, lo: 0, hi: 4 }]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out
+"" -> out
+
+// --- Caso 4: com duplicatas ---
+arr: { v0: 3, v1: 1, v2: 3, v3: 2, v4: 1 }
+res: qs[{ arr: arr, lo: 0, hi: 4 }]
+p0: arr.v0   p1: arr.v1   p2: arr.v2   p3: arr.v3   p4: arr.v4
+r0: res.v0   r1: res.v1   r2: res.v2   r3: res.v3   r4: res.v4
+"Original: [{p0}, {p1}, {p2}, {p3}, {p4}]" -> out
+"Ordenado: [{r0}, {r1}, {r2}, {r3}, {r4}]" -> out

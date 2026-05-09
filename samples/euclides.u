@@ -1,0 +1,29 @@
+// Algoritmo de Euclides — Máximo Divisor Comum (MDC)
+// GCD(a, 0) = a
+// GCD(a, b) = GCD(b, a % b)
+
+mdc: [par] {
+    match par.b {
+        0: par.a
+        _: mdc[{ a: par.b, b: par.a % par.b }]
+    }
+}
+
+"=== Algoritmo de Euclides ===" -> out
+
+pares: [
+    { a: 48,  b: 18  },
+    { a: 100, b: 75  },
+    { a: 56,  b: 98  },
+    { a: 17,  b: 13  },
+    { a: 270, b: 192 },
+    { a: 84,  b: 36  },
+    { a: 1071, b: 462 }
+]
+
+each par in pares {
+    va: par.a
+    vb: par.b
+    resultado: mdc[par]
+    "MDC({va}, {vb}) = {resultado}" -> out
+}
