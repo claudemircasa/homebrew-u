@@ -1,7 +1,7 @@
 # Universal Abstract Language (U) - Manual da Linguagem
 
 ```text
-    []---------[]       []---------[]     u-shell ~ version 1.2.1 (Governor)
+    []---------[]       []---------[]     u-shell ~ version 1.2.2 (Governor)
     | \       / |       | \       / |     --------------------------------------------------
     |  []---[]  |       |  []---[]  |     Project: Universal Abstract Language (U)
     []--| \ |--[]       []--| / |--[]     Paradigm: AI-First, Functional Pipelines, Contexts
@@ -245,15 +245,26 @@ buscarUsuario: [async] [id] {
 
 Essa é a grande revolução da linguagem U. Você não escreve o código lógico, você define **Diretivas** para delegar a computação a um agente LLM integrado. O runtime executa isso nativamente.
 
-Se um *Closure* possuir a diretiva `[prompt: "..."]` mas não declarar o bloco de execução lógico `{ ... }`, ele se transforma num **Agent Delegate**.
+A linguagem possui a arquitetura revolucionária de *Inter-Process Communication* (IPC) embutida nativamente para IA. Se um *Closure* possuir a diretiva `[prompt: "..."]` mas não declarar o bloco de execução lógico `{ ... }`, o Runtime congela a execução do processo e solicita, através de um JSON nativo, que o sistema ou Agente "hospedeiro" resolva a tarefa.
+
+Veja um exemplo de como coletar um número do usuário via terminal e delegar uma simulação matemática complexa para o Agente IA:
 
 ```aml
-// Declara a função e o que ela faz textualmente:
-summarizeText: [text] [prompt: "Return a 2-sentence summary in Portuguese"]
+// 1. O programa interage e coleta um input simples:
+"Digite a taxa Selic anual (ex: 10.5):" -> out
+taxa_selic <- in
 
-// Chama a função assincronamente e deixa a magia acontecer:
-resumo: await summarizeText["This is a very long article about the history of compilers..."]
-resumo -> out
+// 2. Definimos uma função complexa, mas SEM implementação. 
+// O Interpretador U mandará um JSON via stdout pedindo pro Agente hospedeiro calcular:
+projetarRendimento: [taxa] [prompt: "Calcule juros compostos para R$ 10.000 em 5 anos usando essa taxa. Retorne APENAS o número final."]
+
+// 3. O Runtime pausa e invoca o IPC para que o LLM responda:
+"Processando simulação complexa via IA..." -> out
+resultado: await projetarRendimento[taxa_selic]
+
+// 4. O fluxo U retoma normalmente com a resposta do LLM e envia para o sink:
+"Seu rendimento em 5 anos será:" -> out
+resultado -> out
 ```
 
 ---
