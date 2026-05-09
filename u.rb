@@ -1,9 +1,9 @@
 class U < Formula
   desc "Universal Abstract Language (U) Compiler & U-Shell"
   homepage "https://governor.ltd"
-  url "https://github.com/claudemircasa/homebrew-u/releases/download/v1.1.1/u-mac-v1.1.1.tar.gz"
-  sha256 "c16038b692e8fbc59f58d8dae8dc025b0f93cea232ea77c2cd00decfb481175c"
-  version "1.1.1"
+  url "https://github.com/claudemircasa/homebrew-u/releases/download/v1.2.0/u-mac-v1.2.0.tar.gz"
+  sha256 "051263712d04c4ffc97233f03f40dbfe7b6d68fc9852e779bbfc552c43038a0f"
+  version "1.2.0"
   # Proprietary license: Governor Ltda.
 
   def install
