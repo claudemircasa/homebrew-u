@@ -1,15 +1,18 @@
-// 1. O programa interage e coleta um input simples:
+{%
+  Demonstração de Agent Directives (IPC com LLM)
+  1. Coleta input do usuário
+  2. Define função delegada ao agente (sem corpo)
+  3. Runtime pausa e emite JSON IPC para o agente hospedeiro
+  4. Fluxo retoma com a resposta do LLM
+%}
+
 "Digite a taxa Selic anual (ex: 10.5):" -> out
 taxa_selic <- in
 
-// 2. Definimos uma função complexa, mas SEM implementação. 
-// O Interpretador U mandará um JSON via stdout pedindo pro Agente hospedeiro calcular:
 projetarRendimento: [taxa] [prompt: "Calcule juros compostos para R$ 10.000 em 5 anos usando essa taxa. Retorne APENAS o número final."]
 
-// 3. O Runtime pausa e invoca o IPC para que o LLM responda:
 "Processando simulação complexa via IA..." -> out
 resultado: await projetarRendimento[taxa_selic]
 
-// 4. O fluxo U retoma normalmente com a resposta do LLM e envia para o sink:
 "Seu rendimento em 5 anos será:" -> out
 resultado -> out

@@ -1,4 +1,6 @@
-// Example Script in U (Universal Abstract Language)
+{%
+  Example Script in U (Universal Abstract Language)
+%}
 
 // 1. Basic Math and Assignment
 score: 10 + 5 * 2

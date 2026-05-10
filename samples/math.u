@@ -1,5 +1,7 @@
-// Fatorial e Fibonacci em U
-// Demonstra recursão, match e pipelines
+{%
+  Fatorial e Fibonacci em U
+  Demonstra recursão, match e pipelines
+%}
 
 // --- Fatorial ---
 

@@ -1,7 +1,7 @@
 # Universal Abstract Language (U) - Manual da Linguagem
 
 ```text
-    []---------[]       []---------[]     u-shell ~ version 1.2.3 (Governor)
+    []---------[]       []---------[]     u-shell ~ version 1.3.0 (Governor)
     | \       / |       | \       / |     --------------------------------------------------
     |  []---[]  |       |  []---[]  |     Project: Universal Abstract Language (U)
     []--| \ |--[]       []--| / |--[]     Paradigm: AI-First, Functional Pipelines, Contexts
