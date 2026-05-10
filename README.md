@@ -58,18 +58,6 @@ Os arquivos da linguagem U utilizam a extensão **`.u`**.
 brew install claudemircasa/u/u
 ```
 
-### Via Cargo / código-fonte
-
-```bash
-cargo run --release script.u
-```
-
-Ou com o binário compilado:
-
-```bash
-./target/release/u script.u
-```
-
 ---
 
 ## 2. Tipos Primitivos
